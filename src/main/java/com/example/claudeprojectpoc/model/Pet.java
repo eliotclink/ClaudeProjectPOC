@@ -1,15 +1,26 @@
 package com.example.claudeprojectpoc.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.Objects;
 import java.util.UUID;
 
-public class Pet {
+@Table("pets")
+public class Pet implements Persistable<String> {
 
+    @Id
     private String id;
     private String name;
     private String species;
     private String breed;
     private Integer age;
     private Double price;
+
+    @Transient
+    private boolean newEntity;
 
     public Pet() {}
 
@@ -20,9 +31,15 @@ public class Pet {
         this.breed = breed;
         this.age = age;
         this.price = price;
+        this.newEntity = true;
     }
 
+    @Override
     public String getId() { return id; }
+
+    @Override
+    public boolean isNew() { return newEntity; }
+
     public String getName() { return name; }
     public String getSpecies() { return species; }
     public String getBreed() { return breed; }
@@ -40,11 +57,11 @@ public class Pet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Pet other)) return false;
-        return java.util.Objects.equals(id, other.id);
+        return Objects.equals(id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hashCode(id);
+        return Objects.hashCode(id);
     }
 }
