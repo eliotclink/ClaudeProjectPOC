@@ -1,5 +1,6 @@
 package com.example.claudeprojectpoc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
@@ -38,6 +39,7 @@ public class Pet implements Persistable<String> {
     public String getId() { return id; }
 
     @Override
+    @JsonIgnore
     public boolean isNew() { return newEntity; }
 
     public String getName() { return name; }
