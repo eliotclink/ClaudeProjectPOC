@@ -6,6 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
+
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -19,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(PetController.class)
+@WithMockUser
 class PetControllerTest {
 
     @Autowired
@@ -44,7 +49,7 @@ class PetControllerTest {
     void addPet_returnsCreatedPet() {
         when(petService.addPet(any())).thenReturn(Mono.just(pet));
 
-        webTestClient.post().uri("/api/pets")
+        webTestClient.mutateWith(csrf()).post().uri("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(pet)
                 .exchange()
@@ -89,7 +94,7 @@ class PetControllerTest {
     void patchPet_returnsUpdatedPet() {
         when(petService.patchPet(eq("test-id"), any())).thenReturn(Mono.just(pet));
 
-        webTestClient.patch().uri("/api/pets/test-id")
+        webTestClient.mutateWith(csrf()).patch().uri("/api/pets/test-id")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(pet)
                 .exchange()
@@ -103,7 +108,7 @@ class PetControllerTest {
         when(petService.patchPet(eq("unknown"), any()))
                 .thenReturn(Mono.error(new NoSuchElementException("Pet not found: unknown")));
 
-        webTestClient.patch().uri("/api/pets/unknown")
+        webTestClient.mutateWith(csrf()).patch().uri("/api/pets/unknown")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(pet)
                 .exchange()
@@ -114,7 +119,7 @@ class PetControllerTest {
     void deletePet_returnsNoContent() {
         when(petService.deletePet("test-id")).thenReturn(Mono.empty());
 
-        webTestClient.delete().uri("/api/pets/test-id")
+        webTestClient.mutateWith(csrf()).delete().uri("/api/pets/test-id")
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -124,7 +129,7 @@ class PetControllerTest {
         when(petService.deletePet("unknown"))
                 .thenReturn(Mono.error(new NoSuchElementException("Pet not found: unknown")));
 
-        webTestClient.delete().uri("/api/pets/unknown")
+        webTestClient.mutateWith(csrf()).delete().uri("/api/pets/unknown")
                 .exchange()
                 .expectStatus().isNotFound();
     }
