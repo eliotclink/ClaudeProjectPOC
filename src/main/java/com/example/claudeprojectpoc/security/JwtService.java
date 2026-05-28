@@ -70,25 +70,18 @@ public class JwtService {
      * @return a {@code Mono} emitting the username, or empty if the token is invalid or expired
      */
     public Mono<String> validateTokenAndGetUsername(String token) {
-        try {
-            String[] parts = token.split("\\.");
-            if (parts.length != 3) return Mono.empty();
-
-            String signingInput = parts[0] + "." + parts[1];
-            byte[] signature = Base64.getUrlDecoder().decode(parts[2]);
-
-            if (!verify(signingInput.getBytes(StandardCharsets.UTF_8), signature)) return Mono.empty();
-
-            byte[] payloadBytes = Base64.getUrlDecoder().decode(parts[1]);
-            Map<?, ?> claims = MAPPER.readValue(payloadBytes, Map.class);
-
-            long exp = ((Number) claims.get("exp")).longValue();
-            if (System.currentTimeMillis() / 1000 > exp) return Mono.empty();
-
-            return Mono.just((String) claims.get("sub"));
-        } catch (Exception e) {
-            return Mono.empty();
-        }
+        return Mono.fromCallable(() -> token.split("\\."))
+                .filter(parts -> parts.length == 3)
+                .filter(parts -> verify(
+                        (parts[0] + "." + parts[1]).getBytes(StandardCharsets.UTF_8),
+                        Base64.getUrlDecoder().decode(parts[2])
+                ))
+                .flatMap(parts -> Mono.fromCallable(() ->
+                        (Map<?, ?>) MAPPER.readValue(Base64.getUrlDecoder().decode(parts[1]), Map.class)
+                ))
+                .filter(claims -> System.currentTimeMillis() / 1000 <= ((Number) claims.get("exp")).longValue())
+                .map(claims -> (String) claims.get("sub"))
+                .onErrorResume(e -> Mono.empty());
     }
 
     /**
