@@ -13,7 +13,7 @@ import java.util.Map;
 public class JwtService {
 
     private static final long EXPIRATION_SECONDS = 86400;
-    private static final String HEADER = base64url("{\"alg\":\"Dilithium5\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+    private static final String HEADER = base64url("{\"alg\":\"ML-DSA-87\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final PqcKeyManager keyManager;
@@ -54,7 +54,7 @@ public class JwtService {
 
     private byte[] sign(byte[] data) {
         try {
-            Signature signer = Signature.getInstance("Dilithium", "BC");
+            Signature signer = Signature.getInstance("ML-DSA", "BC");
             signer.initSign(keyManager.getPrivateKey());
             signer.update(data);
             return signer.sign();
@@ -65,7 +65,7 @@ public class JwtService {
 
     private boolean verify(byte[] data, byte[] signature) {
         try {
-            Signature verifier = Signature.getInstance("Dilithium", "BC");
+            Signature verifier = Signature.getInstance("ML-DSA", "BC");
             verifier.initVerify(keyManager.getPublicKey());
             verifier.update(data);
             return verifier.verify(signature);
