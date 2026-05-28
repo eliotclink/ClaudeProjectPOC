@@ -8,6 +8,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * Extracts a JWT from the {@code Authorization: Bearer <token>} header of an incoming request.
+ *
+ * <p>This is the first step in the WebFlux authentication pipeline. It converts a raw HTTP
+ * request into an unauthenticated {@link Authentication} object holding the raw token string.
+ * The token is not validated here — that responsibility belongs to {@link JwtAuthenticationManager}.
+ *
+ * <p>Returns {@code Mono.empty()} if the header is absent or does not start with {@code "Bearer "},
+ * which causes Spring Security to skip JWT authentication for that request (the authorization
+ * layer will then enforce access rules independently).
+ */
 @Component
 public class JwtAuthenticationConverter implements ServerAuthenticationConverter {
 
